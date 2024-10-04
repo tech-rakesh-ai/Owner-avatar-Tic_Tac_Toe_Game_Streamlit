@@ -98,7 +98,6 @@ def normal_computer_move(dashboard):
     empty_cells = [i for i, cell in enumerate(dashboard) if cell == " "]
     return random.choice(empty_cells) if empty_cells else None
 
-
 def main():
     st.set_page_config(page_title="Tic Tac Toe", page_icon="🎮")
     st.title("🎮 Tic Tac Toe")
@@ -182,42 +181,62 @@ def main():
                 if st.button("Make Move"):
                     if game_state['dashboard'][move - 1] == " ":
                         game_state['dashboard'][move - 1] = game_state['current_player']
-                        game_state['current_player'] = 'O' if game_state['current_player'] == 'X' else 'X'
-                        st.rerun()
+                        game_state['winner'] = check_for_winner(game_state['dashboard'])
+
+                        # Check if the game is over after player's move
+                        if game_state['winner'] or " " not in game_state['dashboard']:
+                            game_state['game_on'] = False  # Set the game to over
+                        else:
+                            game_state['current_player'] = 'O' if game_state['current_player'] == 'X' else 'X'
+                            st.rerun()
                     else:
                         st.error("That position is already taken. Try another one.")
+
             elif game_state['game_mode'] == 'PvNC' and game_state['current_player'] == 'O':
                 move = normal_computer_move(game_state['dashboard'])
                 if move is not None:
                     game_state['dashboard'][move] = 'O'
-                    game_state['current_player'] = 'X'
-                st.rerun()
+                    game_state['winner'] = check_for_winner(game_state['dashboard'])
+
+                    # Check if the game is over after computer's move
+                    if game_state['winner'] or " " not in game_state['dashboard']:
+                        game_state['game_on'] = False  # Set the game to over
+                    else:
+                        game_state['current_player'] = 'X'
+                    st.rerun()
+
             elif game_state['game_mode'] == 'PvSC' and game_state['current_player'] == 'O':
                 move = smart_computer_move(game_state['dashboard'])
                 if move is not None:
                     game_state['dashboard'][move] = 'O'
-                    game_state['current_player'] = 'X'
-                st.rerun()
+                    game_state['winner'] = check_for_winner(game_state['dashboard'])
 
+                    # Check if the game is over after computer's move
+                    if game_state['winner'] or " " not in game_state['dashboard']:
+                        game_state['game_on'] = False  # Set the game to over
+                    else:
+                        game_state['current_player'] = 'X'
+                    st.rerun()
+
+            # Check for a winner after each move
             game_state['winner'] = check_for_winner(game_state['dashboard'])
+
+            # Check if the game is over
             if game_state['winner'] or " " not in game_state['dashboard']:
                 game_state['game_on'] = False  # Set the game to over
                 st.rerun()
 
+        # This will display the result when the game is over
         if not game_state['game_on']:  # Check if the game is over
             if game_state['winner']:
                 winner_name = game_state['player1'] if game_state['winner'] == 'X' else game_state['player2']
                 st.success(f"{winner_name} wins!")
             else:
-                st.write("It's a tie!")
+                st.success("It's a tie! 😉")
             if st.button("Play Again"):
                 game_state = initialize_game()
                 st.session_state.game_state = game_state
                 st.rerun()
 
-
 if __name__ == "__main__":
     main()
-
-
-
